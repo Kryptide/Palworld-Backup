@@ -55,4 +55,4 @@ This script works for us but any recommendations that can make this more efficie
 
 ## A Step Further
 
-To keep myself from opening Palworld without the script I deleted the original Steam shortcut on my Desktop and replaced it with a Shortcut to the script. I saved the batch file to another folder, created a shortcut, placed it on my Desktop to replace the original and changed the Icon to the Palworld Icon. Now whenever I want to play and run the game through the script so that I never worry about having an old or outdated backup.
+To keep myself from opening Palworld without the script I deleted the original Steam shortcut on my Desktop and replaced it with a Shortcut to the script. I saved the batch file to another folder, created a shortcut, placed it on my Desktop to replace the original and changed the Icon to the Palworld Icon. Now whenever I want to play I just run the game through the script so that I never worry about having an old or outdated backup.
