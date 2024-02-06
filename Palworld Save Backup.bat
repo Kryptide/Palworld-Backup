@@ -36,13 +36,30 @@ REM (Option 1): Runs only the backup command then exits.
 if %option% equ 1 (
     call :backup
 )
-REM (Option 2):Runs Palworld, Creates a countdown to allow the game to fully launch before executing the backup automation.
+REM (Option 2): Runs Palworld, Creates a countdown to allow the game to fully launch before executing the backup automation.
 if %option% equ 2 (
-REM If you have Steam installed normally this should open Palworld. If it doesn't right-click on the steam shortcut to Palworld, select
-REM Properties and copy/paste what is in the URL field to the line below after the word start. 
+    REM If you have Steam installed normally this should open Palworld. If it doesn't right-click on the steam shortcut to Palworld, select
+    REM Properties and copy/paste what is in the URL field to the line below after the word start.
     start steam://rungameid/1623730
-    call :countdown 10
-    call :CHECK_PROCESS
+    REM Wait until palworld.exe is running
+    :WAIT_FOR_PALWORLD
+    echo Waiting for Palworld to open
+    set "loading_dots=."
+    :WAIT_FOR_PALWORLD_LOOP
+    timeout /t 0 /nobreak >nul
+    tasklist /FI "IMAGENAME eq palworld.exe" 2>NUL | find /I /N "palworld.exe">NUL
+    if "%ERRORLEVEL%"=="0" (
+		echo.
+        call :countdown 10
+        call :CHECK_PROCESS
+    ) else (
+        set "loading_dots=!loading_dots!."
+        if "!loading_dots!"=="...." set "loading_dots=."
+        cls
+		set "loading_message=Waiting for Palworld to open!loading_dots!"
+        echo !loading_message!
+        goto :WAIT_FOR_PALWORLD_LOOP
+    )
 )
 REM (Option 3): Simply closes the Terminal Window
 if %option% equ 3 (
@@ -52,7 +69,7 @@ REM This is the backup command which only copies files that are new.
 REM If the file that is being backed up is newer or has changed it will overwrite the old backup files.
 REM None of the files in your actual save directory is ever modified, only Copied for backup.
 :backup
-REM This should automatically finds your game save folder. If your game saves are located outside the defauly directory change it below.
+REM This should automatically find your game save folder. If your game saves are located outside the default directory change it below.
 set source_folder=%USERPROFILE%\AppData\Local\Pal
 REM This is where the backups get saved. I have it set as a folder on your Desktop. Feel free to save it anywhere you like.
 set destination_folder=%USERPROFILE%\Desktop\PalworldBackup
@@ -68,7 +85,7 @@ goto :EOF
 REM This sets the process the script waits to end.
 :CHECK_PROCESS
 set "GAME_PROCESS=palworld.exe"
-REM This calls the loding animation.
+REM This calls the loading animation.
 set "loading_dots=."
 
 REM This is what continually checks to see if Palworld is still running so it knows when it's been closed.
@@ -78,17 +95,17 @@ tasklist | find /i "%GAME_PROCESS%" > nul
 REM Text displayed once the game as been identified as no longer running.
 if errorlevel 1 (
     echo Palworld Has Been Closed. Running Backup...
-REM Text displayed showing the script is still waiting for the game to be closed before running the backup.	
+REM Text displayed showing the script is still waiting for the game to be closed before running the backup.
 ) else (
     set "process_message=Palworld is Still Running. Waiting for Game to Close!loading_dots!"
     echo !process_message!
     set "loading_dots=!loading_dots!."
     if "!loading_dots!"=="....." set "loading_dots=."
-REM The amount of time in seconds between checks to see if Palworld is still running. Change 1 to whatever you like if 1 second is too fast.	
+    REM The amount of time in seconds between checks to see if Palworld is still running. Change 1 to whatever you like if 1 second is too fast.
     timeout /t 1 /nobreak > nul 2>&1
-REM Clears the terminal before each check to keep from having a million lines in the terminal.
+    REM Clears the terminal before each check to keep from having a million lines in the terminal.
     cls
-REM Command to go back to the beginning of the process check until Palworld has been closed.
+    REM Command to go back to the beginning of the process check until Palworld has been closed.
     goto CHECK_PROCESS_LOOP
 )
 REM Ends script after Palworld has been closed and backed up.
