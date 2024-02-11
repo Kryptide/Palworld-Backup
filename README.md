@@ -66,6 +66,7 @@ Option 5: This simply exits the terminal window and ends the script.
 
 This was made for myself and my girlfriend in the event we were affected by this bug but figured I would share in case it would be helpful for others.
 This script works for us but any recommendations that can make this more efficient or effective I'm more than open to hearing.
+**Thank you to catboy_feet on Reddit for the ideas and motivation to release v3**
 
 
 ## A Step Further
