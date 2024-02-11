@@ -6,6 +6,7 @@ setlocal enabledelayedexpansion
 REM Sets Color of Terminal BG and Text
 color 0E
 REM ASCII Art
+:start
 echo ___________________________________________________________________________
 echo " _______  _______  ___      _     _  _______  ______    ___      ______  "
 echo "|       ||   _   ||   |    | | _ | ||       ||    _ |  |   |    |      | "
@@ -27,14 +28,17 @@ echo ------------------
 REM Menu Selection Text
 echo 1. Backup Palworld Save Files and Exit
 echo 2. Run Palworld and Backup on Game Exit
-echo 3. Exit
+echo 3. Restore Backup
+echo 4. Update Backup Save Location
+echo 5. Exit
 REM Removes the need to hit Enter after making selection
-choice /C 123 /N /M "Enter option (1/2/3): "
+choice /C 12345 /N /M "Enter option (1/2/3/4/5): "
 
 set option=%errorlevel%
 REM (Option 1): Runs only the backup command then exits.
 if %option% equ 1 (
     call :backup
+    goto :EOF
 )
 REM (Option 2): Runs Palworld, Creates a countdown to allow the game to fully launch before executing the backup automation.
 if %option% equ 2 (
@@ -49,38 +53,156 @@ if %option% equ 2 (
     timeout /t 0 /nobreak >nul
     tasklist /FI "IMAGENAME eq palworld.exe" 2>NUL | find /I /N "palworld.exe">NUL
     if "%ERRORLEVEL%"=="0" (
-		echo.
+        echo.
         call :countdown 10
         call :CHECK_PROCESS
     ) else (
         set "loading_dots=!loading_dots!."
         if "!loading_dots!"=="...." set "loading_dots=."
         cls
-		set "loading_message=Waiting for Palworld to open!loading_dots!"
+        set "loading_message=Waiting for Palworld to open!loading_dots!"
         echo !loading_message!
         goto :WAIT_FOR_PALWORLD_LOOP
     )
 )
-REM (Option 3): Simply closes the Terminal Window
+
+REM (Option 3): Restore Backup
 if %option% equ 3 (
+    call :restore_backup
+    goto :EOF
+)
+
+REM (Option 4): Change Backup Location
+if %option% equ 4 (
+    REM Run the backup_path.vbs script to allow the user to select a new backup location
+    echo Select a Backup Location...
+    for /f "delims=" %%a in ('cscript //nologo backup_path.vbs "Select a new folder for backup"') do set "destination_folder=%%a"
+    REM Trim leading and trailing spaces
+    set "destination_folder=!destination_folder!"
+    if not defined destination_folder goto :EOF
+    REM Save the selected folder to a text file, overwriting the existing one if it exists
+    if exist backup_path.txt (
+        >backup_path.txt echo !destination_folder!
+        echo Backup path updated!
+    ) else (
+        >backup_path.txt echo !destination_folder!
+        echo Backup path created!
+    )
+    REM Display message for 3 seconds
+    timeout /t 3 >nul
+    REM Clear the terminal window
+    cls
+    REM Restart the script
+    goto :start
+)
+
+REM (Option 5): Exit
+if %option% equ 5 (
+    echo Exiting...
+    timeout /t 5 >nul
     exit
 )
-REM This is the backup command which only copies files that are new.
-REM If the file that is being backed up is newer or has changed it will overwrite the old backup files.
-REM None of the files in your actual save directory is ever modified, only Copied for backup.
+
+REM Backup function
 :backup
 REM This should automatically find your game save folder. If your game saves are located outside the default directory change it below.
-set source_folder=%USERPROFILE%\AppData\Local\Pal
-REM This is where the backups get saved. I have it set as a folder on your Desktop. Feel free to save it anywhere you like.
-set destination_folder=%USERPROFILE%\Desktop\PalworldBackup
+set source_folder=%USERPROFILE%\AppData\Local\Pal\Saved
+REM Get current date and time to create a unique name for the .zip file
+for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (set "datestamp=%%a-%%b-%%c")
+for /f "tokens=1-3 delims=/: " %%a in ("%TIME%") do (
+    set "hour=%%a"
+    set "minute=%%b"
+    for /f "tokens=1-2 delims=." %%x in ("%%c") do set "second=%%x"
+)
+REM Convert 24-hour format to 12-hour format and determine AM/PM
+set "ampm=AM"
+if %hour% gtr 12 (
+    set /a "hour=hour-12"
+    set "ampm=PM"
+)
+REM Pad single digits with a leading zero
+if %hour% lss 10 set "hour=0%hour%"
+if %minute% lss 10 set "minute=0%minute%"
+if %second% lss 10 set "second=0%second%"
+REM Format the timestamp
+set "timestamp=%hour%-%minute%-%second%-%ampm%"
+REM Check if the folder selection file exists
+if exist backup_path.txt (
+    set /p "destination_folder=" < backup_path.txt
+) else (
+    REM Call VBScript to select destination folder
+    echo Backup folder is not set. Please select the backup folder.
+    for /f "delims=" %%a in ('cscript //nologo backup_path.vbs "Select a folder for backup"') do set "destination_folder=%%a"
+    REM Trim leading and trailing spaces
+    set "destination_folder=!destination_folder!"
+    if not defined destination_folder goto :EOF
+    REM Save the selected folder to a text file for future use
+    echo !destination_folder!>backup_path.txt
+)
+REM Enclose the destination path in quotes to handle spaces in folder names
+set "zip_file=!destination_folder!\PalworldBackup_%datestamp%_%timestamp%.zip"
 REM This lists the files being backed up and the destination in which it's being saved to in the terminal.
-echo Backing up %source_folder% to %destination_folder%...
+echo Creating zip file: !zip_file!...
 REM This is the actual Backup command.
-xcopy "%source_folder%" "%destination_folder%" /E /I /Y /D
+powershell -Command "Compress-Archive -LiteralPath \"%source_folder%\" -DestinationPath \"%zip_file%\" -Force"
 REM This is shown once the backup transfer is complete.
 echo Backup completed.
+REM Pause for 5 seconds before closing the window
+timeout /t 5 >nul
 REM EOF simply ends the script when finished.
 goto :EOF
+
+
+
+REM Restore Backup function
+:restore_backup
+REM Check if the backup folder is already set
+if not exist backup_path.txt (
+    REM If backup folder is not set, prompt the user to select it
+    echo Backup folder is not set. Please select the backup folder.
+    for /f "delims=" %%a in ('cscript //nologo backup_path.vbs "Select the backup folder"') do set "backup_folder=%%a"
+    REM Save the selected backup folder to backup_path.txt
+    echo !backup_folder!>backup_path.txt
+) else (
+    REM If backup folder is set, read it from backup_path.txt
+    set /p "backup_folder=" < backup_path.txt
+)
+
+REM Display available backup files
+echo List of available backup files:
+setlocal enabledelayedexpansion
+set "count=1"
+for %%F in ("%backup_folder%\*.zip") do (
+    echo !count!. %%~nxF
+    set "backup[!count!]=%%~fF"
+    set /a count+=1
+)
+echo.
+
+REM Allows user to select a backup file
+set /P "backup_choice=Enter the number of the backup file you want to restore: "
+REM Confirm selection
+set "selected_backup=!backup[%backup_choice%]!"
+echo Selected backup: !selected_backup!
+choice /M "Confirm restore of selected backup?"
+if errorlevel 2 goto :EOF
+REM Additional confirmation step
+:confirm_restore
+echo.
+echo WARNING: THIS WILL RESTORE ALL PLAYER CHARACTERS AND MAPS TO THE DATE/TIME OF THE BACKUP SELECTED!
+set /P "confirm_text=Please type 'restore' (without quotes) to confirm the restore: "
+if /I not "!confirm_text!"=="restore" (
+    echo Check your spelling and Try Again.
+    goto confirm_restore
+)
+REM Extract selected backup to destination folder
+echo Restoring selected backup...
+REM Enclose both the source and destination paths in quotes to handle spaces in folder names
+powershell -Command "Expand-Archive -LiteralPath \"!selected_backup!\" -DestinationPath \"%USERPROFILE%\AppData\Local\Pal\" -Force"
+echo Backup restored successfully.
+timeout /t 5 /nobreak >nul
+goto :EOF
+
 
 REM This sets the process the script waits to end.
 :CHECK_PROCESS
