@@ -76,7 +76,7 @@ To keep myself from opening Palworld without the script I deleted the original S
 ## Screenshots
 
 ![Patch Notes](https://michaelreynolds.tech/wp-content/uploads/2024/02/patch_notes.png)
-![Main Menu](https://michaelreynolds.tech/wp-content/uploads/2024/02/main_menu_v3.png)
+![Main Menu](https://michaelreynolds.tech/wp-content/uploads/2024/02/main_menu_v3.1.png)
 ![Restore](https://michaelreynolds.tech/wp-content/uploads/2024/02/restore.png)
 ![Waiting for Launch](https://michaelreynolds.tech/wp-content/uploads/2024/02/waiting_for_launch.png)
 ![Waiting for Close](https://michaelreynolds.tech/wp-content/uploads/2024/02/waiting_for_close.png)
