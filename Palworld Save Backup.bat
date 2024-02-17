@@ -1,6 +1,6 @@
 @echo off
-REM Sets the Window Title/Name
-title Palworld Automated Game Save Backup
+REM Sets the Window Title/Name/Version
+title Palworld Automated Game Save Backup v3.1
 REM Allows for 10 Second Delay
 setlocal enabledelayedexpansion
 REM Sets Color of Terminal BG and Text
@@ -22,14 +22,14 @@ echo "        |       ||       ||       ||      _||  |_|  ||   |_| |           "
 echo "        |  _   | |       ||      _||     |_ |       ||    ___|           "
 echo "        | |_|   ||   _   ||     |_ |    _  ||       ||   |               "
 echo "        |_______||__| |__||_______||___| |_||_______||___|               "
-echo ____________________________________________________Created By: Kryptide___
-echo Choose an option:
+echo ____________________________________________________________Kryptide_v3.1__
+echo Choose an Option:
 echo ------------------
 REM Menu Selection Text
 echo 1. Backup Palworld Save Files and Exit
 echo 2. Run Palworld and Backup on Game Exit
 echo 3. Restore Backup
-echo 4. Update Backup Save Location
+echo 4. Set or Update Backup Save Location
 echo 5. Exit
 REM Removes the need to hit Enter after making selection
 choice /C 12345 /N /M "Enter option (1/2/3/4/5): "
@@ -47,12 +47,17 @@ if %option% equ 2 (
     start steam://rungameid/1623730
     REM Wait until palworld.exe is running
     :WAIT_FOR_PALWORLD
+	REM Waiting Text
     echo Waiting for Palworld to open
+	REM Loading dots animation
     set "loading_dots=."
-    :WAIT_FOR_PALWORLD_LOOP
+    REM The loop checking to see if palworld.exe is running so the script doesn't start prematurely.
+	:WAIT_FOR_PALWORLD_LOOP
     timeout /t 0 /nobreak >nul
+	REM Finding and checking the palworld.exe process
     tasklist /FI "IMAGENAME eq palworld.exe" 2>NUL | find /I /N "palworld.exe">NUL
-    if "%ERRORLEVEL%"=="0" (
+    REM A simple 10 second countdown after it finds palworld.exe running
+	if "%ERRORLEVEL%"=="0" (
         echo.
         call :countdown 10
         call :CHECK_PROCESS
@@ -74,13 +79,13 @@ if %option% equ 3 (
 
 REM (Option 4): Change Backup Location
 if %option% equ 4 (
-    REM Run the backup_path.vbs script to allow the user to select a new backup location
+    REM Runs the backup_path.vbs script to allow the user to select a new/change backup location.
     echo Select a Backup Location...
     for /f "delims=" %%a in ('cscript //nologo backup_path.vbs "Select a new folder for backup"') do set "destination_folder=%%a"
-    REM Trim leading and trailing spaces
+    REM Trim leading and trailing spaces to properly define the file path
     set "destination_folder=!destination_folder!"
     if not defined destination_folder goto :EOF
-    REM Save the selected folder to a text file, overwriting the existing one if it exists
+    REM Saves the selected folder path to the backup_path text file, overwriting the existing one if it exists
     if exist backup_path.txt (
         >backup_path.txt echo !destination_folder!
         echo Backup path updated!
@@ -92,7 +97,7 @@ if %option% equ 4 (
     timeout /t 3 >nul
     REM Clear the terminal window
     cls
-    REM Restart the script
+    REM Restarts the script back to the main menu after setting or changing the backup folder path
     goto :start
 )
 
@@ -107,33 +112,33 @@ REM Backup function
 :backup
 REM This should automatically find your game save folder. If your game saves are located outside the default directory change it below.
 set source_folder=%USERPROFILE%\AppData\Local\Pal\Saved
-REM Get current date and time to create a unique name for the .zip file
+REM Get current date and time to create a unique name for the .zip backup file
 for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (set "datestamp=%%a-%%b-%%c")
 for /f "tokens=1-3 delims=/: " %%a in ("%TIME%") do (
     set "hour=%%a"
     set "minute=%%b"
     for /f "tokens=1-2 delims=." %%x in ("%%c") do set "second=%%x"
 )
-REM Convert 24-hour format to 12-hour format and determine AM/PM
+REM This converts the 24-hour format to 12-hour format and determines either AM/PM
 set "ampm=AM"
 if %hour% gtr 12 (
     set /a "hour=hour-12"
     set "ampm=PM"
 )
-REM Pad single digits with a leading zero
+REM Pad single digits with a leading zero which keeps the filename timestamp correctly formated when there is a 1 digit hour or minute.
 if %hour% lss 10 set "hour=0%hour%"
 if %minute% lss 10 set "minute=0%minute%"
 if %second% lss 10 set "second=0%second%"
-REM Format the timestamp
+REM This is the Format of the timestamp
 set "timestamp=%hour%-%minute%-%second%-%ampm%"
-REM Check if the folder selection file exists
+REM This checks if the backup_path.txt already existed or not.
 if exist backup_path.txt (
     set /p "destination_folder=" < backup_path.txt
 ) else (
-    REM Call VBScript to select destination folder
+    REM Calls the backup_path VBScript to allow the selection of the backup folder location
     echo Backup folder is not set. Please select the backup folder.
     for /f "delims=" %%a in ('cscript //nologo backup_path.vbs "Select a folder for backup"') do set "destination_folder=%%a"
-    REM Trim leading and trailing spaces
+    REM Trim leading and trailing spaces to properly define the file path
     set "destination_folder=!destination_folder!"
     if not defined destination_folder goto :EOF
     REM Save the selected folder to a text file for future use
@@ -143,9 +148,9 @@ REM Enclose the destination path in quotes to handle spaces in folder names
 set "zip_file=!destination_folder!\PalworldBackup_%datestamp%_%timestamp%.zip"
 REM This lists the files being backed up and the destination in which it's being saved to in the terminal.
 echo Creating zip file: !zip_file!...
-REM This is the actual Backup command.
+REM This is the actual Backup command that compresses and archives the backup files.
 powershell -Command "Compress-Archive -LiteralPath \"%source_folder%\" -DestinationPath \"%zip_file%\" -Force"
-REM This is shown once the backup transfer is complete.
+REM This dialog is shown once the backup transfer is complete.
 echo Backup completed.
 REM Pause for 5 seconds before closing the window
 timeout /t 5 >nul
@@ -158,7 +163,7 @@ REM Restore Backup function
 :restore_backup
 REM Check if the backup folder is already set
 if not exist backup_path.txt (
-    REM If backup folder is not set, prompt the user to select it
+    REM If backup folder is not set, prompt the user to set one.
     echo Backup folder is not set. Please select the backup folder.
     for /f "delims=" %%a in ('cscript //nologo backup_path.vbs "Select the backup folder"') do set "backup_folder=%%a"
     REM Save the selected backup folder to backup_path.txt
@@ -168,7 +173,7 @@ if not exist backup_path.txt (
     set /p "backup_folder=" < backup_path.txt
 )
 
-REM Display available backup files
+REM Display all available backup .zip files you can restore to.
 echo List of available backup files:
 setlocal enabledelayedexpansion
 set "count=1"
@@ -192,19 +197,22 @@ echo.
 echo WARNING: THIS WILL RESTORE ALL PLAYER CHARACTERS AND MAPS TO THE DATE/TIME OF THE BACKUP SELECTED!
 set /P "confirm_text=Please type 'restore' (without quotes) to confirm the restore: "
 if /I not "!confirm_text!"=="restore" (
-    echo Check your spelling and Try Again.
+    REM if restore is typed incorrectly it will give you another attempt at typing it again.
+	echo Check your spelling and Try Again.
     goto confirm_restore
 )
 REM Extract selected backup to destination folder
 echo Restoring selected backup...
-REM Enclose both the source and destination paths in quotes to handle spaces in folder names
+REM Encloses both the source and destination paths in quotes to handle spaces in folder names
 powershell -Command "Expand-Archive -LiteralPath \"!selected_backup!\" -DestinationPath \"%USERPROFILE%\AppData\Local\Pal\" -Force"
+REM Successful backup dialog
 echo Backup restored successfully.
+REM 5 second pause before closing after restore.
 timeout /t 5 /nobreak >nul
 goto :EOF
 
 
-REM This sets the process the script waits to end.
+REM This sets palworld.exe as the process for the script to check if the process is still active.
 :CHECK_PROCESS
 set "GAME_PROCESS=palworld.exe"
 REM This calls the loading animation.
