@@ -26,13 +26,13 @@ ___________________________________________________________________________
 "        |  _   | |       ||      _||     |_ |       ||    ___|           "
 "        | |_|   ||   _   ||     |_ |    _  ||       ||   |               "
 "        |_______||__| |__||_______||___| |_||_______||___|               "
-____________________________________________________Created By: Kryptide___
-Choose an option:
+____________________________________________________________Kryptide_v3.1__
+Choose an Option:
 ------------------
 1. Backup Palworld Save Files and Exit
 2. Run Palworld and Backup on Game Exit
 3. Restore Backup
-4. Update Backup Save Location
+4. Set or Update Backup Save Location
 5. Exit
 
 ```
