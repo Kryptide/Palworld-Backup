@@ -1,6 +1,6 @@
 @echo off
 REM Sets the Window Title/Name/Version
-title Palworld Automated Game Save Backup v3.1
+title Palworld Automated Game Save Backup v3.2
 REM Allows for 10 Second Delay
 setlocal enabledelayedexpansion
 REM Sets Color of Terminal BG and Text
@@ -22,7 +22,14 @@ echo "        |       ||       ||       ||      _||  |_|  ||   |_| |           "
 echo "        |  _   | |       ||      _||     |_ |       ||    ___|           "
 echo "        | |_|   ||   _   ||     |_ |    _  ||       ||   |               "
 echo "        |_______||__| |__||_______||___| |_||_______||___|               "
-echo ____________________________________________________________Kryptide_v3.1__
+echo _________________________________________________________________Kryptide__
+
+REM Get the latest release version from GitHub
+for /f "delims=" %%v in ('powershell -command "(Invoke-WebRequest -Uri 'https://api.github.com/repos/Kryptide/Palworld-Backup/releases/latest').Content | ConvertFrom-Json | Select -ExpandProperty tag_name"') do set "latest_version=%%v"
+echo Current version: v3.1
+echo Latest version available: %latest_version%
+echo.
+
 echo Choose an Option:
 echo ------------------
 REM Menu Selection Text
@@ -30,9 +37,10 @@ echo 1. Backup Palworld Save Files and Exit
 echo 2. Run Palworld and Backup on Game Exit
 echo 3. Restore Backup
 echo 4. Set or Update Backup Save Location
-echo 5. Exit
+echo 5. Check for Updates
+echo 6. Exit
 REM Removes the need to hit Enter after making selection
-choice /C 12345 /N /M "Enter option (1/2/3/4/5): "
+choice /C 123456 /N /M "Enter option (1/2/3/4/5/6): "
 
 set option=%errorlevel%
 REM (Option 1): Runs only the backup command then exits.
@@ -47,17 +55,17 @@ if %option% equ 2 (
     start steam://rungameid/1623730
     REM Wait until palworld.exe is running
     :WAIT_FOR_PALWORLD
-	REM Waiting Text
+    REM Waiting Text
     echo Waiting for Palworld to open
-	REM Loading dots animation
+    REM Loading dots animation
     set "loading_dots=."
     REM The loop checking to see if palworld.exe is running so the script doesn't start prematurely.
-	:WAIT_FOR_PALWORLD_LOOP
+    :WAIT_FOR_PALWORLD_LOOP
     timeout /t 0 /nobreak >nul
-	REM Finding and checking the palworld.exe process
+    REM Finding and checking the palworld.exe process
     tasklist /FI "IMAGENAME eq palworld.exe" 2>NUL | find /I /N "palworld.exe">NUL
     REM A simple 10 second countdown after it finds palworld.exe running
-	if "%ERRORLEVEL%"=="0" (
+    if "%ERRORLEVEL%"=="0" (
         echo.
         call :countdown 10
         call :CHECK_PROCESS
@@ -101,8 +109,39 @@ if %option% equ 4 (
     goto :start
 )
 
-REM (Option 5): Exit
+REM (Option 5): Check for Updates
 if %option% equ 5 (
+    REM Get the latest release version from GitHub
+    for /f "delims=" %%v in ('powershell -command "(Invoke-WebRequest -Uri 'https://api.github.com/repos/Kryptide/Palworld-Backup/releases/latest').Content | ConvertFrom-Json | Select -ExpandProperty tag_name"') do set "latest_version=%%v"
+    echo Current version: v3.1
+    REM Check if latest_version is blank, if so, retry once
+    if "%latest_version%"=="" (
+        for /f "delims=" %%v in ('powershell -command "(Invoke-WebRequest -Uri 'https://api.github.com/repos/Kryptide/Palworld-Backup/releases/latest').Content | ConvertFrom-Json | Select -ExpandProperty tag_name"') do set "latest_version=%%v"
+    )
+    echo Latest version available: %latest_version%
+    if "%latest_version%" gtr "v3.1" (
+        echo A newer version is available. Updating...
+        REM Retry downloading the file once
+        for /l %%i in (1,1,2) do (
+            powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/Kryptide/Palworld-Backup/main/Palworld Save Backup.bat', 'Palworld Save Backup.bat')"
+            if exist "Palworld Save Backup.bat" (
+                echo Update completed. Please restart the script.
+                goto :start
+            ) else (
+                echo Failed to update. Retrying...
+            )
+        )
+        echo Failed to update after multiple attempts. Please try again later.
+    ) else (
+        echo You're up to date.
+    )
+    timeout /t 7 >nul
+    cls
+    goto :start
+)
+
+REM (Option 6): Exit
+if %option% equ 6 (
     echo Exiting...
     timeout /t 5 >nul
     exit
@@ -125,7 +164,7 @@ if %hour% gtr 12 (
     set /a "hour=hour-12"
     set "ampm=PM"
 )
-REM Pad single digits with a leading zero which keeps the filename timestamp correctly formated when there is a 1 digit hour or minute.
+REM Pad single digits with a leading zero which keeps the filename timestamp correctly formatted when there is a 1 digit hour or minute.
 if %hour% lss 10 set "hour=0%hour%"
 if %minute% lss 10 set "minute=0%minute%"
 if %second% lss 10 set "second=0%second%"
@@ -198,7 +237,7 @@ echo WARNING: THIS WILL RESTORE ALL PLAYER CHARACTERS AND MAPS TO THE DATE/TIME 
 set /P "confirm_text=Please type 'restore' (without quotes) to confirm the restore: "
 if /I not "!confirm_text!"=="restore" (
     REM if restore is typed incorrectly it will give you another attempt at typing it again.
-	echo Check your spelling and Try Again.
+    echo Check your spelling and Try Again.
     goto confirm_restore
 )
 REM Extract selected backup to destination folder
@@ -225,7 +264,9 @@ tasklist | find /i "%GAME_PROCESS%" > nul
 REM Text displayed once the game as been identified as no longer running.
 if errorlevel 1 (
     echo Palworld Has Been Closed. Running Backup...
-REM Text displayed showing the script is still waiting for the game to be closed before running the backup.
+    REM Ends script after Palworld has been closed and backed up.
+    endlocal
+    goto :EOF
 ) else (
     set "process_message=Palworld is Still Running. Waiting for Game to Close!loading_dots!"
     echo !process_message!
@@ -238,10 +279,8 @@ REM Text displayed showing the script is still waiting for the game to be closed
     REM Command to go back to the beginning of the process check until Palworld has been closed.
     goto CHECK_PROCESS_LOOP
 )
-REM Ends script after Palworld has been closed and backed up.
-endlocal
-goto :EOF
-
+REM EOF simply ends the script when finished.
+:end
 REM The countdown you see before the process check automation begins.
 :countdown
 set "COUNT=%1"
