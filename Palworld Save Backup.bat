@@ -126,6 +126,7 @@ if %option% equ 5 (
             powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/Kryptide/Palworld-Backup/main/Palworld Save Backup.bat', 'Palworld Save Backup.bat')"
             if exist "Palworld Save Backup.bat" (
                 echo Update completed. Please restart the script.
+                cls
                 goto :start
             ) else (
                 echo Failed to update. Retrying...
