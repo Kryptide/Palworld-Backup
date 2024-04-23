@@ -113,13 +113,13 @@ REM (Option 5): Check for Updates
 if %option% equ 5 (
     REM Get the latest release version from GitHub
     for /f "delims=" %%v in ('powershell -command "(Invoke-WebRequest -Uri 'https://api.github.com/repos/Kryptide/Palworld-Backup/releases/latest').Content | ConvertFrom-Json | Select -ExpandProperty tag_name"') do set "latest_version=%%v"
-    echo Current version: v3.1
+    echo Current version: v3.2
     REM Check if latest_version is blank, if so, retry once
     if "%latest_version%"=="" (
         for /f "delims=" %%v in ('powershell -command "(Invoke-WebRequest -Uri 'https://api.github.com/repos/Kryptide/Palworld-Backup/releases/latest').Content | ConvertFrom-Json | Select -ExpandProperty tag_name"') do set "latest_version=%%v"
     )
     echo Latest version available: %latest_version%
-    if "%latest_version%" gtr "v3.1" (
+    if "%latest_version%" gtr "v3.2" (
         echo A newer version is available. Updating...
         REM Retry downloading the file once
         for /l %%i in (1,1,2) do (
