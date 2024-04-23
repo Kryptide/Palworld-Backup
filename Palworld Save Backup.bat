@@ -1,6 +1,6 @@
 @echo off
 REM Sets the Window Title/Name/Version
-title Palworld Automated Game Save Backup v3.1
+title Palworld Automated Game Save Backup v3.2
 REM Allows for 10 Second Delay
 setlocal enabledelayedexpansion
 REM Sets Color of Terminal BG and Text
