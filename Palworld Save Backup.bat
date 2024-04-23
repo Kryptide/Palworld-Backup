@@ -26,7 +26,7 @@ echo _________________________________________________________________Kryptide__
 
 REM Get the latest release version from GitHub
 for /f "delims=" %%v in ('powershell -command "(Invoke-WebRequest -Uri 'https://api.github.com/repos/Kryptide/Palworld-Backup/releases/latest').Content | ConvertFrom-Json | Select -ExpandProperty tag_name"') do set "latest_version=%%v"
-echo Current version: v3.1
+echo Current version: v3.2
 echo Latest version available: %latest_version%
 echo.
 
