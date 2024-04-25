@@ -88,6 +88,7 @@ To keep myself from opening Palworld without the script I deleted the original S
 ![Main Menu](https://michaelreynolds.tech/wp-content/uploads/2024/04/main_menu_v3.3.png)
 ![Restore](https://michaelreynolds.tech/wp-content/uploads/2024/02/restore.png)
 ![Waiting for Launch](https://michaelreynolds.tech/wp-content/uploads/2024/02/waiting_for_launch.png)
-![Waiting for Close](https://michaelreynolds.tech/wp-content/uploads/2024/02/waiting_for_close.png)
+![Waiting for Close](https://michaelreynolds.tech/wp-content/uploads/2024/04/waiting_to_close.png)
 ![Select Default Backup Folder](https://michaelreynolds.tech/wp-content/uploads/2024/02/backup_path_selection.png)
+![Update](https://michaelreynolds.tech/wp-content/uploads/2024/04/update.png)
 
