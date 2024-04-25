@@ -1,6 +1,6 @@
 @echo off
 REM Sets the Window Title/Name/Version
-title Palworld Automated Game Save Backup v3.2
+title Palworld Automated Game Save Backup v3.3
 REM Allows for 10 Second Delay
 setlocal enabledelayedexpansion
 REM Sets Color of Terminal BG and Text
@@ -24,9 +24,12 @@ echo "        | |_|   ||   _   ||     |_ |    _  ||       ||   |               "
 echo "        |_______||__| |__||_______||___| |_||_______||___|               "
 echo _________________________________________________________________Kryptide__
 
-REM Get the latest release version from GitHub
+REM This reaches out to Github to pull the latest version. Responsible for the flash you see when opening the script.
+REM Code used to grab the latest version from Github.
 for /f "delims=" %%v in ('powershell -command "(Invoke-WebRequest -Uri 'https://api.github.com/repos/Kryptide/Palworld-Backup/releases/latest').Content | ConvertFrom-Json | Select -ExpandProperty tag_name"') do set "latest_version=%%v"
-echo Current version: v3.2
+REM The current version the user is running.
+echo Current version: v3.3
+REM The output of the latest version available on Github
 echo Latest version available: %latest_version%
 echo.
 
@@ -111,35 +114,49 @@ if %option% equ 4 (
 
 REM (Option 5): Check for Updates
 if %option% equ 5 (
-    REM Get the latest release version from GitHub
+    REM Get the latest release version number from GitHub repo.
     for /f "delims=" %%v in ('powershell -command "(Invoke-WebRequest -Uri 'https://api.github.com/repos/Kryptide/Palworld-Backup/releases/latest').Content | ConvertFrom-Json | Select -ExpandProperty tag_name"') do set "latest_version=%%v"
-    echo Current version: v3.2
-    REM Check if latest_version is blank, if so, retry once
+    echo Current version: v3.3
+    REM While making this, sometimes the latest available version field would be blank. This mitigates that by reloading the version number a second time if it doesn't appear on first launch.
     if "%latest_version%"=="" (
         for /f "delims=" %%v in ('powershell -command "(Invoke-WebRequest -Uri 'https://api.github.com/repos/Kryptide/Palworld-Backup/releases/latest').Content | ConvertFrom-Json | Select -ExpandProperty tag_name"') do set "latest_version=%%v"
     )
     echo Latest version available: %latest_version%
-    if "%latest_version%" gtr "v3.2" (
-        echo A newer version is available. Updating...
-        REM Retry downloading the file once
-        for /l %%i in (1,1,2) do (
+    REM Check if an update is available
+    if "%latest_version%" gtr "v3.3" (
+        echo A newer version is available.
+        REM Prompts the user for their choice in downloading the update or not.
+        choice /M "Do you want to update to the latest version? (Yes/No)"
+        if errorlevel 2 (
+		REM The message the user gets if they decline the update.
+            echo You chose not to update. Returning to the main menu...
+            timeout /t 3 >nul
+            cls
+            goto :start
+        ) else (
+		REM the message the user gets if they agree to update.
+            echo Updating to the latest version...
+            REM This downloads the latest release from the Github repo and overwrites the old version. The script will automatically reload showing the new current version.
             powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/Kryptide/Palworld-Backup/main/Palworld Save Backup.bat', 'Palworld Save Backup.bat')"
             if exist "Palworld Save Backup.bat" (
-                echo Update completed. Please restart the script.
+                echo Update completed. Reloading...
+                timeout /t 5 >nul
                 cls
                 goto :start
             ) else (
-                echo Failed to update. Retrying...
+			REM the message the user gets if there is some sort of issue with donwloading the newest release.
+                echo Failed to update. Please try again later.
             )
         )
-        echo Failed to update after multiple attempts. Please try again later.
     ) else (
+	REM The message the user gets if they're already on the latest version.
         echo You're up to date.
     )
-    timeout /t 7 >nul
+    timeout /t 5 >nul
     cls
     goto :start
 )
+
 
 REM (Option 6): Exit
 if %option% equ 6 (
