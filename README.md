@@ -5,10 +5,11 @@ This is a script created to backup and restore your Palworld Game save Files. Th
 
 ## The Reasoning
 There is currently a critical bug in Palworld that can cause your game saves to disappear randomly for both single and multiplayer worlds. This script was created to keep an ongoing backup of your game saves so in the event you are affected by this bug you can restore your save files.
+![Patch Notes](https://michaelreynolds.tech/wp-content/uploads/2024/04/critical_bug_notice2.jpg)
 
 ## Setup
 
-Simply download the .zip file from the releases page and extract it. You can also copy the code from the batch file and vbs file into a new notepad text document. Make sure that when you select "Save As" to add .bat at the end of the file name as well as .vbs. Then change "Save as Type:" to "All Files (*.*)" and hit save. Palworld_Save_Backup.bat and backup_path.vbs MUST be in the same folder to work correctly. Open the Palworld Save Backup.bat you just saved and allow windows to run the script by selecting "More Info" then "Run Anyways". The file has been commented to show what each command does. If you have any concerns on the security or integrity of the script please feel free to go through and review every command before running.
+Simply download the .zip file from the releases page and extract it. You can also copy the code from the batch file and vbs file into a new notepad text document. Make sure that when you select "Save As" to add .bat at the end of the file name as well as .vbs. Then change "Save as Type:" to "All Files (*.*)" and hit save. Palworld_Save_Backup.bat and backup_path.vbs MUST be in the same folder to work correctly. Open the Palworld Save Backup.bat you just saved and allow windows to run the script by selecting "More Info" then "Run Anyways". I have put a considerable amount of time into commenting each command to show what each one does. If you have any concerns on the security or integrity of the script please feel free to go through and review every command before running.
 
 ```bash
 ___________________________________________________________________________
@@ -26,14 +27,20 @@ ___________________________________________________________________________
 "        |  _   | |       ||      _||     |_ |       ||    ___|           "
 "        | |_|   ||   _   ||     |_ |    _  ||       ||   |               "
 "        |_______||__| |__||_______||___| |_||_______||___|               "
-____________________________________________________________Kryptide_v3.1__
+_________________________________________________________________Kryptide__
+Current version: v3.3
+Latest version available: v3.3
+
 Choose an Option:
 ------------------
 1. Backup Palworld Save Files and Exit
 2. Run Palworld and Backup on Game Exit
 3. Restore Backup
 4. Set or Update Backup Save Location
-5. Exit
+5. Check for Updates
+6. Exit
+Enter option (1/2/3/4/5/6):
+
 
 ```
 
@@ -59,7 +66,9 @@ and ask you to type out the word restore to continue. Simply type the word resto
 Option 4: This will update your backups save location. If for whatever reason you need to change the default location the script uses for backing up your saves you can use this option to easily change it. If for whatever reason you have never selected a default backup folder it will prompt you that you need to create one. 
 Like with option 3 most people won't change this without first running and backup and having a default save location already but just in case I created it to keep from errors occurring.
 
-Option 5: This simply exits the terminal window and ends the script.
+Option 5: This compares the version number of the script the user is running to the latest version released on this repo. If the users script version is lower than the repos it will alert the user and download the latest version straight from the repo. If the users script version is the same or higher than the one in the repo it will alert the user that they are currently up to date.
+
+Option 6: This simply exits the terminal window and ends the script.
 ```
 
 ## Contributing
@@ -75,8 +84,8 @@ To keep myself from opening Palworld without the script I deleted the original S
 
 ## Screenshots
 
-![Patch Notes](https://michaelreynolds.tech/wp-content/uploads/2024/02/patch_notes.png)
-![Main Menu](https://michaelreynolds.tech/wp-content/uploads/2024/02/main_menu_v3.1.png)
+
+![Main Menu](https://michaelreynolds.tech/wp-content/uploads/2024/04/main_menu_v3.3.png)
 ![Restore](https://michaelreynolds.tech/wp-content/uploads/2024/02/restore.png)
 ![Waiting for Launch](https://michaelreynolds.tech/wp-content/uploads/2024/02/waiting_for_launch.png)
 ![Waiting for Close](https://michaelreynolds.tech/wp-content/uploads/2024/02/waiting_for_close.png)
