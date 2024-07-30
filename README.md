@@ -5,7 +5,7 @@ This is a script created to backup and restore your Palworld Game save Files. Th
 
 ## The Reasoning
 There is currently a critical bug in Palworld that can cause your game saves to disappear randomly for both single and multiplayer worlds. This script was created to keep an ongoing backup of your game saves so in the event you are affected by this bug you can restore your save files.
-![bug_notice](https://michaelreynolds.tech/wp-content/uploads/2024/07/bug2.jpg)
+![Patch Notes](https://michaelreynolds.tech/wp-content/uploads/2024/07/bug_notice.jpg)
 
 ## Setup
 
